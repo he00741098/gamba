@@ -1369,7 +1369,7 @@
          * Starts a new Ante (round of increasing difficulty).
          */
         function startNewAnte() {
-            if (currentAnte <= 0) { // Special case for initial game start
+            if (currentAnte < 0) { // Special case for initial game start
                 currentAnte = 0;
             } else {
                 currentAnte++;
