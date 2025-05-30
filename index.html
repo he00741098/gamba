@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>We Who Love Gambling</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text */
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #2d3748; /* Slightly lighter dark background for container */
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            color: #f6ad55; /* Orange accent */
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .game-info, .player-stats {
+            background-color: #4a5568; /* Even lighter dark */
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .game-info p, .player-stats p {
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+
+        .card-display {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            min-height: 120px; /* Ensure space for cards */
+            margin-bottom: 20px;
+        }
+
+        /* Card animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOutShrink {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.5); }
+        }
+
+        .card {
+            background-color: #fff;
+            color: #2d3748;
+            border-radius: 8px;
+            width: 80px;
+            height: 110px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out, border-color 0.1s ease-in-out; /* Added border-color */
+            border: 2px solid transparent;
+            position: relative;
+            animation: fadeIn 0.3s ease-out forwards; /* Apply on initial render */
+        }
+
+        .card.selected {
+            transform: translateY(-15px); /* More pronounced lift */
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.7); /* Stronger shadow */
+            border-color: #f6ad55; /* Orange border */
+        }
+
+        .card.played {
+            animation: fadeOutShrink 0.3s ease-out forwards;
+        }
+
+        .card .rank {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .card .suit {
+            font-size: 1.5em;
+        }
+
+        .card.red .rank, .card.red .suit {
+            color: #e53e3e; /* Red for Hearts/Diamonds */
+        }
+
+        .card.black .rank, .card.black .suit {
+            color: #2d3748; /* Black for Clubs/Spades */
+        }
+
+        .card-placeholder {
+            background-color: #4a5568;
+            border-radius: 8px;
+            width: 80px;
+            height: 110px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #a0aec0;
+            font-size: 0.9em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Button Colors */
+        button {
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            min-width: 120px;
+        }
+
+        /* Main action buttons */
+        #playHandButton, #discardButton {
+            background-color: #f6ad55; /* Orange */
+            color: #2d3748;
+        }
+        #playHandButton:hover, #discardButton:hover {
+            background-color: #ed8936;
+        }
+
+        /* Sort buttons */
+        .sort-controls button {
+            background-color: #9f7aea; /* Purple */
+            color: #e2e8f0;
+        }
+        .sort-controls button:hover {
+            background-color: #805ad5;
+        }
+
+        /* Info/Book buttons */
+        .controls button:not(#playHandButton):not(#discardButton) {
+            background-color: #2b6cb0; /* Blue */
+            color: #e2e8f0;
+        }
+        .controls button:not(#playHandButton):not(#discardButton):hover {
+            background-color: #2c5282;
+        }
+
+        /* Shop buttons (Buy) */
+        .shop-item button {
+            background-color: #81e6d9; /* Green */
+            color: #2d3748;
+        }
+        .shop-item button:hover {
+            background-color: #4fd1c5;
+        }
+
+        /* Shop Reroll button */
+        #rerollShopButton {
+            background-color: #ecc94b; /* Yellow */
+            color: #2d3748;
+        }
+        #rerollShopButton:hover {
+            background-color: #d69e2e;
+        }
+
+        /* Sell Joker button */
+        .joker-card .sell-button, .shop-joker-sell-button { /* Added shop-joker-sell-button */
+            background-color: #e53e3e; /* Red */
+            color: #fff;
+        }
+        .joker-card .sell-button:hover, .shop-joker-sell-button:hover { /* Added shop-joker-sell-button */
+            background-color: #c53030;
+        }
+
+        /* Overlay Close/Continue buttons */
+        .overlay-content button:last-child { /* Targets the "Continue to Next Ante" and "Close Book" buttons */
+            background-color: #a0aec0; /* Gray */
+            color: #2d3748;
+        }
+        .overlay-content button:last-child:hover {
+            background-color: #718096;
+        }
+
+        /* Cash Out button */
+        #cashOutButton {
+            background-color: #d69e2e; /* A distinct color, e.g., slightly darker yellow */
+            color: #2d3748;
+        }
+        #cashOutButton:hover {
+            background-color: #b88a2e;
+        }
+
+
+        button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .message-box {
+            background-color: #2b6cb0; /* Blue for messages */
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 1.1em;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-out forwards; /* Fade in new messages */
+        }
+
+        /* Pulse animation for balance/score updates */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .player-stats p span.pulse-win {
+            animation: pulse 0.3s ease-in-out;
+            color: #81e6d9; /* Green for win */
+        }
+
+        .player-stats p span.pulse-lose {
+            animation: pulse 0.3s ease-in-out;
+            color: #e53e3e; /* Red for loss */
+        }
+
+        .current-round-score-display {
+            font-weight: bold;
+            color: #81e6d9; /* Green for score */
+        }
+
+        .overlay { /* Unified overlay style for shop and book */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s ease-in-out;
+        }
+
+        .overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .overlay-content { /* Unified content style */
+            background-color: #2d3748;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            max-width: 700px; /* Kept for other overlays */
+            width: 90%;
+            text-align: center;
+            position: relative;
+            max-height: 90vh; /* Allow scrolling for content */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        /* Full screen for shop */
+        #shopOverlay .overlay-content {
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            max-height: none;
+            border-radius: 0;
+            padding: 20px; /* Adjust padding for full screen */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        #shopOverlay .overlay-content .shop-items-container { /* New container for shop items and owned jokers */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-grow: 1; /* Allows it to take available space */
+            overflow-y: auto; /* Scrollable if content overflows */
+            padding: 10px 0;
+        }
+
+        #shopOverlay .overlay-content h2 {
+            color: #f6ad55;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .shop-items, .joker-book-items, .hand-book-items { /* Specific item containers */
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .shop-item, .book-joker-item, .hand-item { /* Unified item style */
+            background-color: #4a5568;
+            padding: 15px;
+            border-radius: 10px;
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 2px solid transparent;
+            transition: border-color 0.2s ease-in-out;
+            position: relative;
+        }
+
+        .shop-item:hover {
+            border-color: #f6ad55;
+        }
+
+        .shop-item h3, .book-joker-item h3, .hand-item h3 {
+            color: #a0aec0;
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        .shop-item p, .book-joker-item p, .hand-item p {
+            margin: 5px 0;
+            font-size: 0.95em;
+            color: #f8fafc; /* Increased contrast for text */
+        }
+
+        .shop-item .price {
+            font-weight: bold;
+            color: #81e6d9; /* Green for price */
+        }
+
+        .shop-item button {
+            background-color: #81e6d9;
+            color: #2d3748;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            box-shadow: none;
+            border: none;
+        }
+
+        .shop-item button:hover {
+            background-color: #4fd1c5;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .shop-item button:disabled {
+            background-color: #a0aec0;
+        }
+
+        .joker-display {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #4a5568;
+        }
+
+        .joker-card {
+            background-color: #63b3ed; /* Default Blue for Jokers */
+            color: #2d3748;
+            border-radius: 8px;
+            padding: 10px;
+            width: 100px;
+            height: 150px; /* Increased height for description and button */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Space out content and button */
+            align-items: center;
+            font-size: 0.9em;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative; /* For sell button positioning */
+            border: 2px solid transparent; /* For rarity border */
+        }
+
+        /* Rarity colors for Joker cards */
+        .joker-card.common, .book-joker-item.common, .shop-joker-item.common { background-color: #48bb78; } /* Green */
+        .joker-card.uncommon, .book-joker-item.uncommon, .shop-joker-item.uncommon { background-color: #4299e1; } /* Blue */
+        .joker-card.rare, .book-joker-item.rare, .shop-joker-item.rare { background-color: #9f7aea; }    /* Purple */
+        .joker-card.legendary, .book-joker-item.legendary, .shop-joker-item.legendary { background-color: #ecc94b; } /* Gold */
+        .joker-card.affliction, .book-joker-item.affliction, .shop-joker-item.affliction { background-color: #8b4513; color: #f8fafc; } /* SaddleBrown for negative, light text */
+        .joker-card.super, .book-joker-item.super, .shop-joker-item.super { background-color: #ff8c00; color: #f8fafc; } /* DarkOrange for super */
+        .joker-card.advanced, .book-joker-item.advanced, .shop-joker-item.advanced { background-color: #4682b4; color: #f8fafc; } /* SteelBlue for advanced */
+
+
+        .joker-card p, .book-joker-item p, .shop-joker-item p {
+            margin: 0;
+            text-align: center;
+        }
+
+        .joker-card .joker-name, .book-joker-item .joker-name, .shop-joker-item .joker-name {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .joker-card .sell-button, .shop-joker-sell-button {
+            background-color: #e53e3e; /* Red sell button */
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            position: absolute; /* Position over the card */
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 10px); /* Fill card width minus padding */
+        }
+
+        .joker-card .sell-button:hover, .shop-joker-sell-button:hover {
+            background-color: #c53030;
+        }
+
+        .sort-controls {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Tooltip styles */
+        .tooltip {
+            position: absolute;
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            z-index: 1001;
+            bottom: 115%; /* Position above the card */
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            pointer-events: none; /* Allows clicks to pass through */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+
+        .joker-card:hover .tooltip, .shop-item:hover .tooltip, .book-joker-item:hover .tooltip, .shop-joker-item:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .shop-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Hand Toast */
+        .hand-toast {
+            position: absolute;
+            top: 50%; /* Position near the hand display */
+            left: 50%;
+            transform: translate(-50%, 70px); /* Adjust Y to be UNDER cards */
+            background-color: rgba(43, 108, 176, 0.9); /* Blue, slightly transparent */
+            color: #e2e8f0;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out, transform 0.2s ease-in-out;
+            z-index: 900; /* Below overlays, above cards */
+            pointer-events: none; /* Clicks pass through */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .hand-toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, 50px); /* Lift slightly when shown (downwards) */
+        }
+
+        /* Shop Joker List */
+        .shop-owned-jokers {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #4a5568;
+            text-align: center;
+        }
+
+        .shop-owned-jokers h3 {
+            color: #f6ad55;
+            margin-bottom: 15px;
+        }
+
+        .shop-owned-jokers-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .shop-joker-item {
+            background-color: #4a5568; /* Same as shop-item base */
+            padding: 10px;
+            border-radius: 8px;
+            width: 100px; /* Same size as joker-card */
+            height: 150px; /* Increased height for description and button */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .shop-joker-item .joker-name {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        .shop-joker-item p {
+            font-size: 0.85em;
+            color: #f8fafc;
+        }
+        .shop-joker-item .sell-button {
+            position: static; /* Override absolute positioning from .joker-card */
+            transform: none;
+            width: auto;
+            margin-top: 5px;
+        }
+
+        /* Cash Out Dialog Specific Styles */
+        #cashOutDialog .overlay-content {
+            max-width: 400px;
+            padding: 25px;
+        }
+        #cashOutDialog p {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #cbd5e0;
+        }
+        #cashOutDialog .dialog-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        #cashOutDialog .dialog-buttons button {
+            min-width: 100px;
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+        #cashOutDialog #confirmCashOutButton {
+            background-color: #81e6d9; /* Green for confirm */
+            color: #2d3748;
+        }
+        #cashOutDialog #confirmCashOutButton:hover {
+            background-color: #4fd1c5;
+        }
+        #cashOutDialog #cancelCashOutButton {
+            background-color: #e53e3e; /* Red for cancel */
+            color: #fff;
+        }
+        #cashOutDialog #cancelCashOutButton:hover {
+            background-color: #c53030;
+        }
+
+
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .game-info p, .player-stats p {
+                font-size: 1em;
+            }
+            .card {
+                width: 60px;
+                height: 90px;
+            }
+            .card .rank {
+                font-size: 1.5em;
+            }
+            .card .suit {
+                font-size: 1.2em;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+            .shop-item, .book-joker-item, .hand-item {
+                width: 160px;
+            }
+            .joker-card, .shop-joker-item {
+                width: 80px;
+                height: 100px; /* Adjusted for smaller screens */
+                font-size: 0.8em;
+            }
+            .joker-card .sell-button, .shop-joker-sell-button {
+                padding: 3px 5px;
+            }
+            .tooltip {
+                font-size: 0.75em;
+                padding: 6px;
+            }
+            .hand-toast {
+                font-size: 0.9em;
+                padding: 6px 10px;
+                bottom: 10px;
+                transform: translate(-50%, -30px);
+            }
+            .hand-toast.show {
+                transform: translate(-50%, -40px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>We Who Love Gambling</h1>
+
+        <div class="player-stats">
+            <p>Balance: $<span id="playerBalance">100</span></p>
+            <p>Ante: <span id="currentAnte">0</span></p>
+            <p>Jokers: <span id="jokerCount">0</span>/5</p>
+        </div>
+
+        <div class="game-info">
+            <p>Target Score: <span id="targetScore">0</span></p>
+            <p>Current Round Score: <span id="currentRoundScore" class="current-round-score-display">0</span></p>
+            <p>Hands Left: <span id="handsLeft">0</span></p>
+            <p>Discards Left: <span id="discardsLeft">0</span></p>
+            <p>Joker Chips Bonus: <span id="jokerChipsBonus">0</span></p>
+            <p>Joker Mult Bonus: <span id="jokerMultBonus">0</span></p>
+        </div>
+
+        <h2>Your Hand</h2>
+        <div id="playerHandDisplay" class="card-display">
+            </div>
+        <div id="handToast" class="hand-toast"></div>
+
+
+        <div class="sort-controls">
+            <button onclick="sortHand('rank')">Sort by Rank</button>
+            <button onclick="sortHand('suit')">Sort by Suit</button>
+        </div>
+
+        <div class="controls">
+            <button id="playHandButton" onclick="playHand()" disabled>Play Hand</button>
+            <button id="discardButton" onclick="discardSelectedCards()" disabled>Discard Selected</button>
+            <button onclick="openJokerBook()">Joker Book</button>
+            <button onclick="openHandBook()">Hand Book</button>
+            <button id="cashOutButton" onclick="openCashOutDialog()">Cash Out</button>
+        </div>
+
+        <div id="messageBox" class="message-box">
+            Welcome to We Who Love Gambling! Click "Deal New Hand" to start.
+        </div>
+
+        <h2>Your Jokers</h2>
+        <div id="jokerDisplay" class="joker-display">
+            <p id="noJokersMessage">No Jokers yet. Buy some in the shop!</p>
+        </div>
+    </div>
+
+    <div id="shopOverlay" class="overlay">
+        <div class="overlay-content">
+            <h2>Shop</h2>
+            <p>Your Balance: $<span id="shopBalance">100</span></p>
+            <p>Jokers bought this visit: <span id="jokersBoughtThisShopCount">0</span>/2</p>
+            <div class="shop-items-container">
+                <div>
+                    <h3>Available Jokers</h3>
+                    <div id="shopItems" class="shop-items">
+                        </div>
+                </div>
+                <div class="shop-owned-jokers">
+                    <h3>Your Jokers</h3>
+                    <div id="shopOwnedJokersList" class="shop-owned-jokers-list">
+                        <p id="noShopJokersMessage">No Jokers owned.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="shop-controls">
+                <button id="rerollShopButton" onclick="rerollShop()">Reroll Shop ($<span id="rerollCost">2</span>)</button>
+                <button onclick="closeShop()">Continue to Next Ante</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="jokerBookOverlay" class="overlay">
+        <div class="overlay-content">
+            <h2>Joker Book</h2>
+            <div id="jokerBookItems" class="joker-book-items">
+                </div>
+            <button onclick="closeJokerBook()">Close Book</button>
+        </div>
+    </div>
+
+    <div id="handBookOverlay" class="overlay">
+        <div class="overlay-content">
+            <h2>Hand Book</h2>
+            <div id="handBookItems" class="hand-book-items">
+                </div>
+            <button onclick="closeHandBook()">Close Book</button>
+        </div>
+    </div>
+
+    <div id="cashOutDialog" class="overlay">
+        <div class="overlay-content">
+            <h2>Cash Out?</h2>
+            <p id="cashOutMessage"></p>
+            <div class="dialog-buttons">
+                <button id="confirmCashOutButton" onclick="confirmCashOut()">Confirm</button>
+                <button id="cancelCashOutButton" onclick="closeCashOutDialog()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Game State Variables ---
+        let playerBalance = 100;
+        let currentAnte = -1; // Initialize to 0, startNewAnte increments to 1 for first ante
+        let handsLeft = 0;
+        let discardsLeft = 0;
+        let deck = [];
+        let playerHand = [];
+        let selectedCards = [];
+        const MAX_JOKER_SLOTS = 5; // Max positive joker slots allowed
+        const MAX_ANTE = 18; // Define the maximum ante for cash out calculation
+        let jokers = []; // Array to store all active jokers (positive, negative, super, advanced)
+        let targetScore = 0;
+        let currentRoundScore = 0; // New: Score accumulates per round
+        let currentSortOption = 'rank'; // Default sort option
+        let jokersBoughtThisShop = 0; // New: Track jokers bought in current shop visit
+        let rerollCount = 0; // New: Track rerolls in current shop visit
+        const BASE_INTEREST_CAP = 5; // Base maximum interest
+        let currentInterestCap = BASE_INTEREST_CAP; // Current maximum interest, affected by Jokers
+        const MAX_ROUND_EARNINGS = 20; // Maximum money earned per round (winnings + interest)
+        const NEGATIVE_JOKER_SELL_COST_MULTIPLIER = 0.5; // Sell for 50% of absolute purchase price (as a cost)
+        let handToastTimeout; // For toast notification
+
+        // --- DOM Elements ---
+        const playerBalanceSpan = document.getElementById('playerBalance');
+        const currentAnteSpan = document.getElementById('currentAnte');
+        const jokerCountSpan = document.getElementById('jokerCount'); // New
+        const targetScoreSpan = document.getElementById('targetScore');
+        const currentRoundScoreSpan = document.getElementById('currentRoundScore'); // New
+        const handsLeftSpan = document.getElementById('handsLeft');
+        const discardsLeftSpan = document.getElementById('discardsLeft');
+        const jokerChipsBonusSpan = document.getElementById('jokerChipsBonus'); // New
+        const jokerMultBonusSpan = document.getElementById('jokerMultBonus');   // New
+        const playerHandDisplay = document.getElementById('playerHandDisplay');
+        const discardButton = document.getElementById('discardButton');
+        const playHandButton = document.getElementById('playHandButton');
+        const messageBox = document.getElementById('messageBox');
+        const shopOverlay = document.getElementById('shopOverlay');
+        const shopBalanceSpan = document.getElementById('shopBalance');
+        const jokersBoughtThisShopCountSpan = document.getElementById('jokersBoughtThisShopCount'); // New
+        const shopItemsDiv = document.getElementById('shopItems');
+        const jokerDisplayDiv = document.getElementById('jokerDisplay');
+        const noJokersMessage = document.getElementById('noJokersMessage');
+        const rerollCostSpan = document.getElementById('rerollCost'); // New
+        const rerollShopButton = document.getElementById('rerollShopButton'); // New
+        const jokerBookOverlay = document.getElementById('jokerBookOverlay'); // New
+        const jokerBookItemsDiv = document.getElementById('jokerBookItems'); // New
+        const handBookOverlay = document.getElementById('handBookOverlay'); // New
+        const handBookItemsDiv = document.getElementById('handBookItems'); // New
+        const handToast = document.getElementById('handToast'); // New
+        const shopOwnedJokersList = document.getElementById('shopOwnedJokersList'); // New
+        const cashOutDialog = document.getElementById('cashOutDialog'); // New
+        const cashOutMessage = document.getElementById('cashOutMessage'); // New
+
+        // --- Card Data ---
+        const suits = ['♠', '♥', '♦', '♣'];
+        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const cardValues = {
+            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+            'J': 11, 'Q': 12, 'K': 13, 'A': 14
+        };
+        const suitValues = { '♣': 1, '♦': 2, '♥': 3, '♠': 4 }; // For sorting suits
+
+        // --- Hand Scoring Data (Base Chips and Multipliers) ---
+        const handScores = {
+            'High Card': { chips: 10, mult: 1 },
+            'Pair': { chips: 20, mult: 2 },
+            'Two Pair': { chips: 30, mult: 3 },
+            'Three of a Kind': { chips: 40, mult: 4 },
+            'Straight': { chips: 50, mult: 5 },
+            'Flush': { chips: 60, mult: 6 },
+            'Full House': { chips: 70, mult: 7 },
+            'Four of a Kind': { chips: 80, mult: 8 },
+            'Straight Flush': { chips: 100, mult: 10 },
+            'Royal Flush': { chips: 150, mult: 15 }
+        };
+
+        // --- Joker Rarity Definitions ---
+        const rarityDefs = {
+            'common': { maxLevel: 3, color: '#48bb78', shopChance: 0.30 }, // Green
+            'uncommon': { maxLevel: 4, color: '#4299e1', shopChance: 0.25 }, // Blue
+            'rare': { maxLevel: 5, color: '#9f7aea', shopChance: 0.15 },    // Purple
+            'legendary': { maxLevel: 6, color: '#ecc94b', shopChance: 0.05 }, // Gold
+            'affliction': { maxLevel: 3, color: '#8b4513', shopChance: 0.15 }, // SaddleBrown for negative
+            'super': { maxLevel: 4, color: '#ff8c00', shopChance: 0.07 }, // DarkOrange for super
+            'advanced': { maxLevel: 5, color: '#4682b4', shopChance: 0.03 } // SteelBlue for advanced
+        };
+
+        // --- Joker Definitions ---
+        // Added 'slots' property: 1 for standard, >1 for super, 0 for negative/advanced
+        const allJokers = [
+            // Positive Jokers (slots: 1)
+            { name: 'Joker of Spades', baseDescription: '+{val} Mult if you play a Spade', rarity: 'common', baseCost: 10, slots: 1,
+              effect: (score, handCards, handType, level) => {
+                const hasSpade = handCards.some(card => card.suit === '♠');
+                if (hasSpade) score.mult += (4 * level);
+              },
+              getDesc: (level) => `+${4 * level} Mult if you play a Spade`
+            },
+            { name: 'Lucky Joker', baseDescription: '+{val} Chips', rarity: 'common', baseCost: 12, slots: 1,
+              effect: (score, handCards, handType, level) => { score.chips += (15 * level); },
+              getDesc: (level) => `+${15 * level} Chips`
+            },
+            { name: 'Multiplier Joker', baseDescription: '+{val} Mult', rarity: 'common', baseCost: 15, slots: 1,
+              effect: (score, handCards, handType, level) => { score.mult += (3 * level); },
+              getDesc: (level) => `+${3 * level} Mult`
+            },
+            { name: 'Flush Fan', baseDescription: '+{val} Chips for Flush', rarity: 'uncommon', baseCost: 18, slots: 1,
+              effect: (score, handCards, handType, level) => {
+                if (handType === 'Flush') score.chips += (20 * level);
+              },
+              getDesc: (level) => `+${20 * level} Chips for Flush`
+            },
+            { name: 'Straight Supporter', baseDescription: '+{val} Mult for Straight', rarity: 'uncommon', baseCost: 15, slots: 1,
+              effect: (score, handCards, handType, level) => {
+                if (handType === 'Straight') score.mult += (2 * level);
+              },
+              getDesc: (level) => `+${2 * level} Mult for Straight`
+            },
+            { name: 'High Roller', baseDescription: 'x{val} Mult for High Card', rarity: 'uncommon', baseCost: 20, slots: 1,
+              effect: (score, handCards, handType, level) => {
+                if (handType === 'High Card') score.mult *= (1 + level * 0.5); // Multiplier scales
+              },
+              getDesc: (level) => `x${(1 + level * 0.5).toFixed(1)} Mult for High Card`
+            },
+            { name: 'King\'s Favor', baseDescription: '+{val} Chips for each King played', rarity: 'rare', baseCost: 15, slots: 1,
+              effect: (score, handCards, handType, level) => {
+                const kingsPlayed = handCards.filter(card => card.rank === 'K').length;
+                score.chips += (kingsPlayed * 5 * level);
+              },
+              getDesc: (level) => `+${5 * level} Chips for each King played`
+            },
+            { name: 'Small Hand Bonus', baseDescription: '+{val} Mult if you play exactly 3 cards', rarity: 'rare', baseCost: 18, slots: 1,
+              effect: (score, handCards, handType, level) => {
+                if (handCards.length === 3) score.mult += (10 + (level - 1) * 2); // Scales differently
+              },
+              getDesc: (level) => `+${10 + (level - 1) * 2} Mult if you play exactly 3 cards`
+            },
+            { name: 'Miser', baseDescription: '+1 Mult for every $10 in balance (max +{val} Mult)', rarity: 'rare', baseCost: 25, slots: 1,
+              effect: (score, handCards, handType, level) => {
+                const maxMiserMult = 10 + (level - 1) * 2; // Max mult increases with level
+                const bonusMult = Math.min(maxMiserMult, Math.floor(playerBalance / 10));
+                score.mult += bonusMult;
+              },
+              getDesc: (level) => `+1 Mult for every $10 in balance (max +${10 + (level - 1) * 2} Mult)`
+            },
+            { name: 'Discard Dynamo', baseDescription: '+{val} Discard per Ante', rarity: 'legendary', baseCost: 20, slots: 1, type: 'anteStartEffect',
+              effect: (level) => {
+                discardsLeft += (1 + Math.floor((level - 1) / 2)); // +1 at L1, +1 at L2, +2 at L3, etc.
+              },
+              getDesc: (level) => `+${1 + Math.floor((level - 1) / 2)} Discard per Ante`
+            },
+            { name: 'Banker', baseDescription: '+{val} to interest cap', rarity: 'legendary', baseCost: 15, slots: 1, type: 'anteStartEffect',
+              effect: (level) => {
+                currentInterestCap += (2 + (level - 1)); // +2 at L1, +3 at L2, etc.
+              },
+              getDesc: (level) => `+${2 + (level - 1)} to interest cap`
+            },
+            // --- Super Jokers (slots: >1) ---
+            { name: 'Mega Multiplier', baseDescription: 'Massive +{val} Mult', rarity: 'super', baseCost: 50, slots: 2,
+              effect: (score, handCards, handType, level) => { score.mult += (25 * level); },
+              getDesc: (level) => `Massive +${25 * level} Mult (Uses 2 slots)`
+            },
+            { name: 'Ultimate Chips', baseDescription: 'Immense +{val} Chips', rarity: 'super', baseCost: 45, slots: 2,
+              effect: (score, handCards, handType, level) => { score.chips += (100 * level); },
+              getDesc: (level) => `Immense +${100 * level} Chips (Uses 2 slots)`
+            },
+            { name: 'Royal Flush Ace', baseDescription: 'Royal Flush gives +{val} Mult', rarity: 'super', baseCost: 60, slots: 3,
+              effect: (score, handCards, handType, level) => {
+                if (handType === 'Royal Flush') score.mult += (50 * level);
+              },
+              getDesc: (level) => `Royal Flush gives +${50 * level} Mult (Uses 3 slots)`
+            },
+            // --- Advanced Jokers (slots: 0, type: 'advanced') ---
+            { name: 'Free Discard', baseDescription: '+{val} Discard per hand (Doesn\'t use slot)', rarity: 'advanced', baseCost: 30, slots: 0, type: 'anteStartEffect',
+              effect: (level) => { discardsLeft += (1 * level); },
+              getDesc: (level) => `+${1 * level} Discard per Ante (Doesn't use slot)`
+            },
+            { name: 'Wealthy Investor', baseDescription: 'Interest cap increased by +{val} (Doesn\'t use slot)', rarity: 'advanced', baseCost: 40, slots: 0, type: 'anteStartEffect',
+              effect: (level) => { currentInterestCap += (5 * level); },
+              getDesc: (level) => `Interest cap increased by +${5 * level} (Doesn't use slot)`
+            },
+            // New Jokers influencing card drawing
+            { name: 'Deck Protector', baseDescription: 'Prevents drawing {val} cards into hand', rarity: 'rare', baseCost: 25, slots: 1, type: 'anteStartEffect',
+              effect: (level) => {
+                // This will reduce the number of cards drawn into hand from 8
+                // For simplicity, let's say it reduces the initial hand size.
+                // A more complex implementation would modify the draw logic directly.
+                // Here, we'll just track it for potential future use or display.
+                // For now, we'll use a global variable to influence initial hand size.
+              },
+              getDesc: (level) => `Prevents drawing ${1 * level} cards into hand (Doesn't use slot)` // This is a positive joker, but its effect is to prevent drawing
+            },
+            // Negative Jokers (slots: 0, type: 'negative')
+            { name: 'Weakness', baseDescription: '-{val} Chips per hand (Doesn\'t use slot)', rarity: 'affliction', baseCost: -5, slots: 0, type: 'negative',
+              effect: (score, handCards, handType, level) => { score.chips -= (10 * level); },
+              getDesc: (level) => `-${10 * level} Chips per hand (Doesn\'t use slot)`
+            },
+            { name: 'Slowdown', baseDescription: '-{val} Mult per hand (Doesn\'t use slot)', rarity: 'affliction', baseCost: -8, slots: 0, type: 'negative',
+              effect: (score, handCards, handType, level) => { score.mult -= (2 * level); },
+              getDesc: (level) => `-${2 * level} Mult per hand (Doesn\'t use slot)`
+            },
+            { name: 'Discard Eater', baseDescription: '-{val} Discard per Ante (Doesn\'t use slot)', rarity: 'affliction', baseCost: -10, slots: 0,
+              type: 'anteStartEffect', // This effect is applied at ante start
+              effect: (level) => { discardsLeft -= (1 + Math.floor((level - 1) / 2)); },
+              getDesc: (level) => `-${1 + Math.floor((level - 1) / 2)} Discard per Ante (Doesn\'t use slot)`
+            },
+            { name: 'Loan Shark', baseDescription: '-{val} to interest cap (Doesn\'t use slot)', rarity: 'affliction', baseCost: -12, slots: 0,
+              type: 'anteStartEffect', // This effect is applied at ante start
+              effect: (level) => { currentInterestCap -= (2 + (level - 1)); },
+              getDesc: (level) => `-${2 + (level - 1)} to interest cap (Doesn\'t use slot)`
+            },
+            { name: 'Hand Shrinker', baseDescription: 'Draws {val} fewer cards per hand (Doesn\'t use slot)', rarity: 'affliction', baseCost: -15, slots: 0, type: 'anteStartEffect',
+              effect: (level) => {
+                // This will reduce the number of cards drawn into hand from 8
+                // For simplicity, let's say it reduces the initial hand size.
+                // A more complex implementation would modify the draw logic directly.
+                // Here, we'll just track it for potential future use or display.
+              },
+              getDesc: (level) => `Draws ${1 * level} fewer cards per hand (Doesn\'t use slot)`
+            }
+        ];
+
+        // --- Game Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            startNewAnte(); // Start the first ante directly
+        });
+
+        // --- Core Game Functions ---
+
+        /**
+         * Creates a standard 52-card deck.
+         * @returns {Array<Object>} The new deck.
+         */
+        function createDeck() {
+            const newDeck = [];
+            for (let suit of suits) {
+                for (let rank of ranks) {
+                    newDeck.push({ suit, rank });
+                }
+            }
+            return newDeck;
+        }
+
+        /**
+         * Shuffles the given deck using the Fisher-Yates algorithm.
+         * @param {Array<Object>} deck The deck to shuffle.
+         * @returns {Array<Object>} The shuffled deck.
+         */
+        function shuffleDeck(deck) {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            return deck;
+        }
+
+        /**
+         * Deals a new hand to the player and starts a new round.
+         */
+        function dealNewRound() {
+            if (playerBalance <= 0) {
+                gameOver("You ran out of money! Game Over.");
+                return;
+            }
+
+            deck = shuffleDeck(createDeck()); // Reset and shuffle deck
+            playerHand = [];
+            selectedCards = [];
+            handsLeft = 4; // Reset hands per ante
+            discardsLeft = 3; // Reset discards per ante
+            currentRoundScore = 0; // Reset round score for new ante
+
+            applyAnteStartJokerEffects(); // Apply effects that modify ante parameters
+
+            let cardsToDraw = 8;
+            // Apply Hand Shrinker Joker effect
+            const handShrinkerJoker = jokers.find(j => j.name === 'Hand Shrinker');
+            if (handShrinkerJoker) {
+                cardsToDraw -= (1 * handShrinkerJoker.level);
+                cardsToDraw = Math.max(1, cardsToDraw); // Ensure at least 1 card is drawn
+            }
+            // Apply Deck Protector Joker effect
+            const deckProtectorJoker = jokers.find(j => j.name === 'Deck Protector');
+            if (deckProtectorJoker) {
+                cardsToDraw -= (1 * deckProtectorJoker.level);
+                cardsToDraw = Math.max(1, cardsToDraw); // Ensure at least 1 card is drawn
+            }
+
+            // Deal cards to the player
+            for (let i = 0; i < cardsToDraw; i++) {
+                playerHand.push(deck.pop());
+            }
+
+            sortHand(currentSortOption); // Apply current sort option
+            updateUI();
+            setMessageBox('New hand dealt! Select cards to play or discard.');
+            playHandButton.disabled = true; // Disable until cards are selected
+            discardButton.disabled = true; // Disable until cards are selected
+            hideHandToast(); // Hide toast at start of new round
+        }
+
+        /**
+         * Handles card selection/deselection.
+         * @param {Object} card The card object.
+         * @param {number} index The index of the card in playerHand.
+         */
+        function toggleCardSelection(card, index) {
+            const cardElement = playerHandDisplay.children[index];
+            const selectedIndex = selectedCards.indexOf(card);
+
+            if (selectedIndex === -1) {
+                // Select card
+                if (selectedCards.length < 5) { // Max 5 cards for a poker hand
+                    selectedCards.push(card);
+                    cardElement.classList.add('selected');
+                } else {
+                    setMessageBox('You can select a maximum of 5 cards to play.');
+                }
+            } else {
+                // Deselect card
+                selectedCards.splice(selectedIndex, 1);
+                cardElement.classList.remove('selected');
+            }
+            updateControlButtons();
+            updateHandToast(); // Update toast on selection change
+        }
+
+        /**
+         * Updates the state of the control buttons based on selected cards and game state.
+         */
+        function updateControlButtons() {
+            const hasSelected = selectedCards.length > 0;
+            playHandButton.disabled = !hasSelected || handsLeft <= 0;
+            discardButton.disabled = !hasSelected || discardsLeft <= 0;
+        }
+
+        /**
+         * Discards selected cards and draws new ones.
+         */
+        function discardSelectedCards() {
+            if (discardsLeft <= 0) {
+                setMessageBox('No discards left for this Ante!');
+                return;
+            }
+            if (selectedCards.length === 0) {
+                setMessageBox('Select cards to discard first.');
+                return;
+            }
+
+            discardsLeft--;
+            
+            // Animate played cards out
+            const cardElements = Array.from(playerHandDisplay.children);
+            selectedCards.forEach(card => {
+                const index = playerHand.indexOf(card);
+                if (index > -1) {
+                    const el = cardElements[index];
+                    if (el) el.classList.add('played');
+                }
+            });
+
+            // Wait for animation to finish before removing cards
+            setTimeout(() => {
+                playerHand = playerHand.filter(card => !selectedCards.includes(card));
+                
+                // Draw new cards to replenish hand to 8
+                const cardsToDraw = 8 - playerHand.length;
+                for (let i = 0; i < cardsToDraw; i++) {
+                    if (deck.length > 0) {
+                        playerHand.push(deck.pop());
+                    } else {
+                        setMessageBox('Deck is empty! Cannot draw more cards.');
+                        break;
+                    }
+                }
+                selectedCards = []; // Clear selection
+                sortHand(currentSortOption); // Re-sort hand after drawing
+                updateUI();
+                setMessageBox(`Discarded ${selectedCards.length} cards. Discards left: ${discardsLeft}`);
+                updateControlButtons();
+                hideHandToast(); // Hide toast after discard
+            }, 300); // Match animation duration
+        }
+
+        /**
+         * Plays the selected hand, evaluates it, and updates balance.
+         */
+        function playHand() {
+            if (handsLeft <= 0) {
+                setMessageBox('No hands left for this Ante! You must meet the target or lose.');
+                return;
+            }
+            if (selectedCards.length === 0) {
+                setMessageBox('Select cards to play first.');
+                return;
+            }
+            if (selectedCards.length > 5) {
+                setMessageBox('You can only play a maximum of 5 cards for a poker hand.');
+                return;
+            }
+
+            handsLeft--;
+            const playedHand = [...selectedCards]; // Copy selected cards for evaluation
+            
+            // Animate played cards out
+            const cardElements = Array.from(playerHandDisplay.children);
+            selectedCards.forEach(card => {
+                const index = playerHand.indexOf(card);
+                if (index > -1) {
+                    const el = cardElements[index];
+                    if (el) el.classList.add('played');
+                }
+            });
+
+            // Wait for animation to finish before removing cards
+            setTimeout(() => {
+                playerHand = playerHand.filter(card => !selectedCards.includes(card)); // Remove played cards from hand
+                
+                // Draw new cards to replenish hand to 8
+                const cardsToDraw = 8 - playerHand.length;
+                for (let i = 0; i < cardsToDraw; i++) {
+                    if (deck.length > 0) {
+                        playerHand.push(deck.pop());
+                    } else {
+                        setMessageBox('Deck is empty! Cannot draw more cards.');
+                        break;
+                    }
+                }
+
+                selectedCards = []; // Clear selection
+
+                const evaluation = evaluatePokerHand(playedHand);
+                
+                // Create a mutable score object to pass to jokers
+                const currentCalculatedScore = { chips: evaluation.chips, mult: evaluation.mult };
+                let handType = evaluation.type;
+
+                // Apply Joker effects
+                jokers.forEach(joker => {
+                    // Only apply if it's a regular 'in-hand' effect, not an 'anteStartEffect'
+                    if (joker.effect && joker.type !== 'anteStartEffect') {
+                        // Debugging for Miser
+                        if (joker.name === 'Miser') {
+                            console.log(`[Miser Debug] Before effect - Balance: ${playerBalance}, Score Chips: ${currentCalculatedScore.chips}, Mult: ${currentCalculatedScore.mult}`);
+                            joker.effect(currentCalculatedScore, playedHand, handType, joker.level);
+                            console.log(`[Miser Debug] After effect - Score Chips: ${currentCalculatedScore.chips}, Mult: ${currentCalculatedScore.mult}`);
+                        } else {
+                            joker.effect(currentCalculatedScore, playedHand, handType, joker.level);
+                        }
+                    }
+                });
+
+                const finalScoreForHand = currentCalculatedScore.chips * currentCalculatedScore.mult;
+                currentRoundScore += finalScoreForHand; // Accumulate score
+
+                let roundMessage = `You played a ${handType} for ${currentCalculatedScore.chips} Chips and ${currentCalculatedScore.mult} Mult. Hand Score: ${finalScoreForHand}. `;
+                setMessageBox(roundMessage);
+
+                sortHand(currentSortOption); // Re-sort hand after drawing
+                updateUI(); // Update UI immediately after score accumulation
+                updateControlButtons();
+                hideHandToast(); // Hide toast after playing hand
+
+                // Check if ante is complete only after hands run out
+                if (handsLeft <= 0) {
+                    checkAnteCompletion();
+                }
+            }, 300); // Match animation duration
+        }
+
+        /**
+         * Applies Joker effects that trigger at the start of an Ante.
+         */
+        function applyAnteStartJokerEffects() {
+            currentInterestCap = BASE_INTEREST_CAP; // Reset to base before applying Banker
+            let cardsToDrawModifier = 0; // Tracks changes to initial hand size
+
+            jokers.forEach(joker => {
+                if (joker.type === 'anteStartEffect' && joker.effect) {
+                    // Specific handling for jokers that affect base values
+                    if (joker.name === 'Discard Dynamo') {
+                        discardsLeft += (1 + Math.floor((joker.level - 1) / 2));
+                    } else if (joker.name === 'Banker') {
+                        currentInterestCap += (2 + (joker.level - 1));
+                    } else if (joker.name === 'Deck Protector') {
+                        cardsToDrawModifier -= (1 * joker.level); // Reduces cards drawn
+                    } else if (joker.name === 'Hand Shrinker') {
+                        cardsToDrawModifier -= (1 * joker.level); // Reduces cards drawn
+                    }
+                    // For other anteStartEffects, call them normally if they modify other global states
+                    // joker.effect(joker.level); // Call the effect if it's generic
+                }
+            });
+
+            // Adjust initial hand size based on modifiers
+            let initialHandSize = 8 + cardsToDrawModifier;
+            initialHandSize = Math.max(1, initialHandSize); // Ensure at least 1 card is drawn
+
+            // This part needs to be handled when dealing the hand, not here.
+            // The `cardsToDrawModifier` logic should be moved into `dealNewRound`
+            // For now, these joker effects are just setting global states like `discardsLeft` and `currentInterestCap`
+            // The `Deck Protector` and `Hand Shrinker` effects will be applied in `dealNewRound`.
+        }
+
+        /**
+         * Calculates the total bonus chips and multipliers from active jokers.
+         * This is a simplified calculation for display purposes and might not exactly match
+         * the final score if jokers have conditional or multiplicative effects.
+         */
+        function calculateJokerBonuses() {
+            let totalJokerChips = 0;
+            let totalJokerMult = 0;
+
+            jokers.forEach(joker => {
+                // Create a dummy score object to see the base effect
+                const tempScore = { chips: 0, mult: 0 };
+                // Call the effect with a dummy hand and handType, and the joker's level
+                // This is a simplification; complex conditional jokers won't be accurately reflected here
+                // For 'Miser', we'll use current balance to show potential
+                if (joker.effect && joker.type !== 'anteStartEffect') { // Ensure it's an in-hand effect
+                    const originalChips = tempScore.chips;
+                    const originalMult = tempScore.mult;
+
+                    // For Miser, simulate with current balance
+                    if (joker.name === 'Miser') {
+                        const maxMiserMult = 10 + (joker.level - 1) * 2;
+                        const potentialBonusMult = Math.floor(playerBalance / 10);
+                        const bonusMult = Math.min(maxMiserMult, potentialBonusMult);
+                        tempScore.mult += bonusMult;
+                        // console.log(`[Miser Display Debug] Level: ${joker.level}, Balance: ${playerBalance}, Max Mult: ${maxMiserMult}, Potential: ${potentialBonusMult}, Applied: ${bonusMult}`);
+                    } else if (joker.name === 'High Roller') {
+                        // High Roller is multiplicative, so we calculate its additive equivalent for display
+                        // Its effect is score.mult *= (1 + level * 0.5)
+                        // So, the added multiplier is (1 + level * 0.5) - 1 = level * 0.5
+                        totalJokerMult += (joker.level * 0.5);
+                    }
+                    else {
+                         joker.effect(tempScore, [], 'High Card', joker.level); // Pass empty hand/type for general effects
+                         totalJokerChips += tempScore.chips - originalChips;
+                         totalJokerMult += tempScore.mult - originalMult;
+                    }
+                }
+            });
+            return { chips: totalJokerChips, mult: totalJokerMult };
+        }
+
+
+        /**
+         * Checks if the current ante is completed and moves to shop or next ante.
+         */
+        function checkAnteCompletion() {
+            setMessageBox(`End of Ante ${currentAnte}. Your total score is ${currentRoundScore}. Target was ${targetScore}.`);
+            
+            let interestEarned = 0;
+            if (playerBalance > 0) { // Only earn interest if balance is positive
+                interestEarned = Math.min(Math.floor(playerBalance / 10), currentInterestCap);
+            }
+            
+            if (currentRoundScore >= targetScore) {
+                const winnings = Math.ceil(currentRoundScore / 100); // Simple winning calculation based on total score
+                let totalEarnings = winnings + interestEarned;
+                totalEarnings = Math.min(totalEarnings, MAX_ROUND_EARNINGS); // Cap total earnings
+
+                playerBalance += totalEarnings;
+                // Update balance display immediately
+                playerBalanceSpan.textContent = playerBalance;
+                playerBalanceSpan.classList.add('pulse-win');
+                setTimeout(() => playerBalanceSpan.classList.remove('pulse-win'), 300);
+
+                if (currentAnte === MAX_ANTE) {
+                    gameOver(`Congratulations! You beat the final Ante (${MAX_ANTE})! Your final balance is $${playerBalance}.`);
+                    return; // End game
+                }
+
+                setMessageBox(`Ante ${currentAnte} completed! You beat the target. Won $${winnings} + $${interestEarned} interest (capped at $${totalEarnings}). Proceeding to shop.`);
+                setTimeout(openShop, 2000); // Open shop after a short delay
+            } else {
+                const loss = Math.ceil((targetScore - currentRoundScore) / 50); // Simple loss calculation
+                playerBalance -= loss;
+                // Update balance display immediately
+                playerBalanceSpan.textContent = playerBalance;
+                setMessageBox(`Ante ${currentAnte} failed! You didn't meet the target. You lost $${loss}. Earned $${interestEarned} interest.`);
+                playerBalanceSpan.classList.add('pulse-lose');
+                setTimeout(() => playerBalanceSpan.classList.remove('pulse-lose'), 300);
+                if (playerBalance <= 0) {
+                    gameOver("You ran out of money! Game Over.");
+                    return;
+                }
+                setTimeout(openShop, 2000); // Still go to shop, but then next ante will be harder
+            }
+            discardButton.disabled = true;
+            playHandButton.disabled = true;
+        }
+
+        /**
+         * Starts a new Ante (round of increasing difficulty).
+         */
+        function startNewAnte() {
+            if (currentAnte == -1) { // Special case for initial game start
+                currentAnte = 1;
+            } else {
+                currentAnte++;
+            }
+            
+            let baseInitial = 400; // Starting target score
+            let currentBase = baseInitial;
+            let currentExponent = 0;
+            let scalingFactor = 1.2; // Default for Ante 1-6 (reduced by 0.5 from 1.7)
+
+            if (currentAnte == 1) { // Explicitly set for Ante 1
+                targetScore = 400;
+            } else if (currentAnte <= 6) {
+                currentExponent = currentAnte - 1;
+                scalingFactor = 1.2;
+                targetScore = Math.floor(baseInitial * Math.pow(scalingFactor, currentExponent));
+            } else if (currentAnte <= 9) { // Ante 7, 8, 9
+                currentBase = Math.floor(baseInitial * Math.pow(1.2, 5)); // Base after Ante 6
+                currentExponent = currentAnte - 6;
+                scalingFactor = 1.4; // Reduced by 0.5 from 1.9
+                targetScore = Math.floor(currentBase * Math.pow(scalingFactor, currentExponent));
+            } else if (currentAnte <= 12) { // Ante 10, 11, 12
+                currentBase = Math.floor(baseInitial * Math.pow(1.2, 5) * Math.pow(1.4, 3)); // Base after Ante 9
+                currentExponent = currentAnte - 9;
+                scalingFactor = 2.5; // Reduced by 0.5 from 3
+                targetScore = Math.floor(currentBase * Math.pow(scalingFactor, currentExponent));
+            } else if (currentAnte <= 16) { // Ante 13, 14, 15, 16
+                currentBase = Math.floor(baseInitial * Math.pow(1.2, 5) * Math.pow(1.4, 3) * Math.pow(2.5, 3)); // Base after Ante 12
+                currentExponent = currentAnte - 12;
+                scalingFactor = 4.5; // Reduced by 0.5 from 5
+                targetScore = Math.floor(currentBase * Math.pow(scalingFactor, currentExponent));
+            } else if (currentAnte <= MAX_ANTE) { // Ante 17, 18 (Final Ante)
+                currentBase = Math.floor(baseInitial * Math.pow(1.2, 5) * Math.pow(1.4, 3) * Math.pow(2.5, 3) * Math.pow(4.5, 4)); // Base after Ante 16
+                currentExponent = currentAnte - 16;
+                scalingFactor = 6.5; // Reduced by 0.5 from 7
+                targetScore = Math.floor(currentBase * Math.pow(scalingFactor, currentExponent));
+            } else {
+                targetScore = Infinity; // Should not be reached if game ends at Ante 18
+                gameOver("You have completed all Antes!");
+                return;
+            }
+
+            handsLeft = 4;
+            discardsLeft = 3;
+            currentRoundScore = 0; // Reset round score for new ante
+            playerHand = []; // Clear hand
+            selectedCards = []; // Clear selection
+            deck = shuffleDeck(createDeck()); // Reset and shuffle deck
+
+            applyAnteStartJokerEffects(); // Apply effects that modify ante parameters
+
+            // Deal initial hand for the new ante
+            let cardsToDraw = 8;
+            const handShrinkerJoker = jokers.find(j => j.name === 'Hand Shrinker');
+            if (handShrinkerJoker) {
+                cardsToDraw -= (1 * handShrinkerJoker.level);
+            }
+            const deckProtectorJoker = jokers.find(j => j.name === 'Deck Protector');
+            if (deckProtectorJoker) {
+                cardsToDraw -= (1 * deckProtectorJoker.level);
+            }
+            cardsToDraw = Math.max(1, cardsToDraw); // Ensure at least 1 card is drawn
+
+            for (let i = 0; i < cardsToDraw; i++) {
+                playerHand.push(deck.pop());
+            }
+
+            sortHand(currentSortOption); // Apply current sort option
+            updateUI();
+            setMessageBox(`Starting Ante ${currentAnte}. New target score: ${targetScore}.`);
+            playHandButton.disabled = true;
+            discardButton.disabled = true;
+            hideHandToast(); // Hide toast at start of new ante
+        }
+
+        /**
+         * Handles game over state.
+         * @param {string} message The game over message.
+         */
+        function gameOver(message) {
+            setMessageBox(message + " Refresh to play again.");
+            discardButton.disabled = true;
+            playHandButton.disabled = true;
+        }
+
+        // --- UI Update Functions ---
+
+        /**
+         * Updates all dynamic UI elements.
+         */
+        function updateUI() {
+            playerBalanceSpan.textContent = playerBalance;
+            currentAnteSpan.textContent = currentAnte;
+            // Calculate occupied slots for display: sum of slots for positive/super jokers NOT at max level
+            const occupiedSlots = jokers.filter(j => j.slots > 0 && j.level < rarityDefs[j.rarity].maxLevel).reduce((sum, j) => sum + j.slots, 0);
+            jokerCountSpan.textContent = occupiedSlots; 
+            targetScoreSpan.textContent = targetScore;
+            currentRoundScoreSpan.textContent = currentRoundScore; // Update current round score
+            handsLeftSpan.textContent = handsLeft;
+            discardsLeftSpan.textContent = discardsLeft;
+            
+            const jokerBonuses = calculateJokerBonuses();
+            jokerChipsBonusSpan.textContent = jokerBonuses.chips;
+            jokerMultBonusSpan.textContent = jokerBonuses.mult.toFixed(1); // Display mult as fixed 1 decimal
+
+            renderPlayerHand();
+            renderJokers();
+            updateControlButtons();
+        }
+
+        /**
+         * Renders the player's hand in the UI.
+         */
+        function renderPlayerHand() {
+            playerHandDisplay.innerHTML = ''; // Clear existing cards
+            if (playerHand.length === 0) {
+                playerHandDisplay.innerHTML = '<div class="card-placeholder">Draw 8 Cards</div>';
+                return;
+            }
+
+            playerHand.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card');
+                cardElement.classList.add(card.suit === '♥' || card.suit === '♦' ? 'red' : 'black');
+                if (selectedCards.includes(card)) {
+                    cardElement.classList.add('selected');
+                }
+                cardElement.innerHTML = `
+                    <div class="rank">${card.rank}</div>
+                    <div class="suit">${card.suit}</div>
+                `;
+                cardElement.onclick = () => toggleCardSelection(card, index);
+                playerHandDisplay.appendChild(cardElement);
+            });
+        }
+
+        /**
+         * Sorts the player's hand by rank or suit.
+         * @param {string} type 'rank' or 'suit'.
+         */
+        function sortHand(type) {
+            currentSortOption = type; // Update current sort option
+            if (type === 'rank') {
+                playerHand.sort((a, b) => getRankValue(a.rank) - getRankValue(b.rank));
+            } else if (type === 'suit') {
+                playerHand.sort((a, b) => {
+                    if (suitValues[a.suit] !== suitValues[b.suit]) {
+                        return suitValues[a.suit] - suitValues[b.suit];
+                    }
+                    return getRankValue(a.rank) - getRankValue(b.rank); // Secondary sort by rank
+                });
+            }
+            renderPlayerHand(); // Re-render to show sorted hand
+        }
+
+        /**
+         * Renders the active jokers in the UI.
+         */
+        function renderJokers() {
+            jokerDisplayDiv.innerHTML = '';
+            if (jokers.length === 0) {
+                noJokersMessage.style.display = 'block';
+                jokerDisplayDiv.appendChild(noJokersMessage);
+            } else {
+                noJokersMessage.style.display = 'none';
+                jokers.forEach((joker, index) => {
+                    const rarityDef = rarityDefs[joker.rarity];
+                    const jokerElement = document.createElement('div');
+                    jokerElement.classList.add('joker-card', joker.rarity);
+                    jokerElement.style.backgroundColor = rarityDef.color; // Apply rarity color
+                    if (['affliction', 'super', 'advanced'].includes(joker.rarity)) { // Ensure text color for these rarities is readable
+                        jokerElement.style.color = '#f8fafc';
+                    } else {
+                        jokerElement.style.color = '#2d3748'; /* Default for positive jokers */
+                    }
+
+
+                    // Escape single quotes in joker.name for onclick
+                    const escapedJokerName = escapeHtml(joker.name); // Use escapeHtml for safety
+
+                    jokerElement.innerHTML = `
+                        <p class="joker-name">${joker.name} (Lvl ${joker.level})</p>
+                        <p>${joker.getDesc(joker.level)}</p>
+                        <div class="tooltip">${escapeHtml(joker.getDesc(joker.level))}</div>
+                        <button class="sell-button" onclick="sellJoker(${index})">Sell ($${getJokerSellPrice(joker)})</button>
+                    `;
+                    jokerDisplayDiv.appendChild(jokerElement);
+                });
+            }
+        }
+
+        /**
+         * Calculates the sell price/cost of a joker.
+         * Negative jokers cost money to sell.
+         * @param {Object} joker The joker object.
+         * @returns {number} The sell price (positive for gain, negative for cost).
+         */
+        function getJokerSellPrice(joker) {
+            if (joker.type === 'negative') {
+                return -Math.floor(Math.abs(joker.currentCost) * NEGATIVE_JOKER_SELL_COST_MULTIPLIER); // Cost to sell negative joker
+            }
+            return Math.floor(joker.currentCost / 2); // Gain for selling positive joker
+        }
+
+        /**
+         * Sells a joker from the player's collection.
+         * @param {number} index The index of the joker to sell.
+         */
+        function sellJoker(index) {
+            const jokerToSell = jokers[index];
+            if (jokerToSell) {
+                const sellPrice = getJokerSellPrice(jokerToSell);
+                
+                // Check if player has enough money to sell a negative joker
+                if (sellPrice < 0 && playerBalance < Math.abs(sellPrice)) {
+                    setMessageBox(`Not enough money to sell ${jokerToSell.name}! You need $${Math.abs(sellPrice)}.`);
+                    return;
+                }
+
+                playerBalance += sellPrice; // If sellPrice is negative, it subtracts from balance
+                jokers.splice(index, 1); // Remove the joker
+                setMessageBox(`Sold ${jokerToSell.name} for $${sellPrice}.`);
+                updateUI();
+                // If shop is open, refresh its owned jokers list
+                if (shopOverlay.classList.contains('active')) {
+                    populateShopOwnedJokers();
+                    populateShopItems(); // Also refresh available items to ensure correct disabled states
+                    shopBalanceSpan.textContent = playerBalance; // Update balance in shop
+                }
+            }
+        }
+
+        /**
+         * Sets the message in the message box.
+         * @param {string} message The message to display.
+         */
+        function setMessageBox(message) {
+            messageBox.textContent = message;
+        }
+
+        // --- Shop Functions ---
+
+        /**
+         * Opens the shop overlay and populates it with items.
+         */
+        function openShop() {
+            jokersBoughtThisShop = 0; // Reset count for new shop visit
+            rerollCount = 0; // Reset reroll count for new shop visit
+            shopBalanceSpan.textContent = playerBalance;
+            jokersBoughtThisShopCountSpan.textContent = jokersBoughtThisShop; // Update shop UI
+            updateRerollCost(); // Update reroll cost display
+            populateShopItems(); // Populate initial shop items
+            populateShopOwnedJokers(); // Populate owned jokers in shop
+            shopOverlay.classList.add('active');
+        }
+
+        /**
+         * Populates the shop items based on rarity and existing jokers.
+         */
+        function populateShopItems() {
+            shopItemsDiv.innerHTML = ''; // Clear previous items
+
+            const offeredJokers = [];
+            while (offeredJokers.length < 3) {
+                const randomRarity = getRandomRarity();
+                const possibleJokersOfRarity = allJokers.filter(j => j.rarity === randomRarity);
+                if (possibleJokersOfRarity.length === 0) continue; // Should not happen with current setup
+
+                const randomJokerDef = possibleJokersOfRarity[Math.floor(Math.random() * possibleJokersOfRarity.length)];
+
+                // Check if this joker is already offered
+                if (offeredJokers.some(oj => oj.name === randomJokerDef.name)) continue;
+
+                // Check if player already has this joker and it's at max level
+                const existingJoker = jokers.find(j => j.name === randomJokerDef.name);
+                const rarityMaxLevel = rarityDefs[randomJokerDef.rarity].maxLevel;
+                if (existingJoker && existingJoker.level >= rarityMaxLevel) {
+                    continue; // Skip if already max level
+                }
+
+                offeredJokers.push(randomJokerDef);
+            }
+
+            offeredJokers.forEach(jokerDef => {
+                const itemElement = document.createElement('div');
+                itemElement.classList.add('shop-item');
+                
+                const existingJoker = jokers.find(j => j.name === jokerDef.name);
+                let displayCost = jokerDef.baseCost;
+                let nextLevel = 1;
+
+                if (existingJoker) {
+                    nextLevel = existingJoker.level + 1;
+                    // Cost for leveling up: baseCost * (currentLevel + 1)
+                    displayCost = jokerDef.baseCost * nextLevel;
+                }
+                
+                const rarityMaxLevel = rarityDefs[jokerDef.rarity].maxLevel;
+                const isMaxLevel = existingJoker && existingJoker.level >= rarityMaxLevel;
+
+                // Calculate current occupied slots by positive jokers that are NOT max level
+                const currentOccupiedSlots = jokers.filter(j => j.slots > 0 && j.level < rarityDefs[j.rarity].maxLevel).reduce((sum, j) => sum + j.slots, 0);
+                
+                // Determine if purchase is disabled
+                let isDisabled = false;
+                if (playerBalance < displayCost) {
+                    isDisabled = true; // Not enough money
+                } else if (jokersBoughtThisShop >= 2) {
+                    isDisabled = true; // Max jokers bought this visit
+                } else if (isMaxLevel) {
+                    isDisabled = true; // Joker is already max level
+                } else if (!existingJoker && jokerDef.slots > 0 && (currentOccupiedSlots + jokerDef.slots) > MAX_JOKER_SLOTS) {
+                    // If it's a NEW positive/super joker AND adding it would exceed MAX_JOKER_SLOTS
+                    isDisabled = true;
+                }
+
+                // Escape single quotes in jokerDef.name for onclick
+                const escapedJokerName = escapeHtml(jokerDef.name);
+
+                itemElement.innerHTML = `
+                    <h3>${jokerDef.name}</h3>
+                    <p>${jokerDef.getDesc(existingJoker ? existingJoker.level : 1)}</p>
+                    <div class="tooltip">${escapeHtml(jokerDef.getDesc(existingJoker ? existingJoker.level : 1))}</div>
+                    <p class="price">Cost: $${displayCost}</p>
+                    <button onclick="buyShopItem('${escapedJokerName}')" ${isDisabled ? 'disabled' : ''}>
+                        ${isMaxLevel ? 'MAX LEVEL' : (existingJoker ? `Level Up (L${nextLevel})` : 'Buy')}
+                    </button>
+                `;
+                shopItemsDiv.appendChild(itemElement);
+            });
+        }
+
+        /**
+         * Populates the list of owned jokers within the shop.
+         */
+        function populateShopOwnedJokers() {
+            shopOwnedJokersList.innerHTML = ''; // Clear existing
+            if (jokers.length === 0) {
+                shopOwnedJokersList.innerHTML = '<p id="noShopJokersMessage" style="color: #cbd5e0;">No Jokers owned.</p>';
+            } else {
+                jokers.forEach((joker, index) => {
+                    const rarityDef = rarityDefs[joker.rarity];
+                    const jokerItemElement = document.createElement('div');
+                    jokerItemElement.classList.add('shop-joker-item', joker.rarity);
+                    jokerItemElement.style.backgroundColor = rarityDef.color;
+                    if (['affliction', 'super', 'advanced'].includes(joker.rarity)) {
+                        jokerItemElement.style.color = '#f8fafc';
+                    } else {
+                        jokerItemElement.style.color = '#2d3748';
+                    }
+
+                    jokerItemElement.innerHTML = `
+                        <p class="joker-name">${joker.name} (Lvl ${joker.level})</p>
+                        <p>${joker.getDesc(joker.level)}</p>
+                        <div class="tooltip">${escapeHtml(joker.getDesc(joker.level))}</div>
+                        <button class="shop-joker-sell-button" onclick="sellJoker(${index})">Sell ($${getJokerSellPrice(joker)})</button>
+                    `;
+                    shopOwnedJokersList.appendChild(jokerItemElement);
+                });
+            }
+        }
+
+        /**
+         * Gets a random rarity based on predefined probabilities.
+         * @returns {string} The selected rarity.
+         */
+        function getRandomRarity() {
+            const rand = Math.random();
+            let cumulativeChance = 0;
+            const rarityNames = Object.keys(rarityDefs);
+            for (let i = 0; i < rarityNames.length; i++) {
+                const rarityName = rarityNames[i];
+                cumulativeChance += rarityDefs[rarityName].shopChance;
+                if (rand < cumulativeChance) {
+                    return rarityName;
+                }
+            }
+            return 'common'; // Fallback
+        }
+
+        /**
+         * Calculates the cost of the next reroll.
+         * @returns {number} The reroll cost.
+         */
+        function getRerollCost() {
+            return 2 + (rerollCount * 1); // Starts at $2, increases by $1 each time
+        }
+
+        /**
+         * Updates the reroll cost display and button state.
+         */
+        function updateRerollCost() {
+            const cost = getRerollCost();
+            rerollCostSpan.textContent = cost;
+            rerollShopButton.disabled = playerBalance < cost;
+        }
+
+        /**
+         * Rerolls the available jokers in the shop.
+         */
+        function rerollShop() {
+            const cost = getRerollCost();
+            if (playerBalance >= cost) {
+                playerBalance -= cost;
+                rerollCount++;
+                shopBalanceSpan.textContent = playerBalance;
+                setMessageBox(`Shop rerolled for $${cost}.`);
+                populateShopItems(); // Generate new shop items
+                updateRerollCost(); // Update cost for next reroll
+            } else {
+                setMessageBox('Not enough money to reroll the shop!');
+            }
+        }
+
+        /**
+         * Buys an item from the shop.
+         * @param {string} itemName The name of the item to buy.
+         */
+        function buyShopItem(itemName) {
+            const jokerDef = allJokers.find(j => j.name === itemName);
+            const existingJoker = jokers.find(j => j.name === itemName);
+            const rarityMaxLevel = rarityDefs[jokerDef.rarity].maxLevel;
+
+            if (existingJoker && existingJoker.level >= rarityMaxLevel) {
+                setMessageBox(`This Joker is already at MAX LEVEL (${rarityMaxLevel})!`);
+                return;
+            }
+
+            const currentOccupiedSlots = jokers.filter(j => j.slots > 0 && j.level < rarityDefs[j.rarity].maxLevel).reduce((sum, j) => sum + j.slots, 0);
+            
+            // Check cap ONLY if it's a new positive/super joker
+            if (!existingJoker && jokerDef.slots > 0 && (currentOccupiedSlots + jokerDef.slots) > MAX_JOKER_SLOTS) {
+                setMessageBox(`Not enough Joker slots! You need ${jokerDef.slots} slots, but only have ${MAX_JOKER_SLOTS - currentOccupiedSlots} available.`);
+                return;
+            }
+
+            if (jokersBoughtThisShop >= 2) {
+                setMessageBox('You can only buy 2 Jokers per shop visit!');
+                return;
+            }
+
+            let purchaseCost = jokerDef.baseCost;
+            if (existingJoker) {
+                purchaseCost = jokerDef.baseCost * (existingJoker.level + 1);
+            }
+
+            if (playerBalance >= purchaseCost) {
+                // If it's a negative joker, purchaseCost is negative, so adding it increases balance
+                // If it's a positive joker, purchaseCost is positive, so subtracting it decreases balance
+                playerBalance -= purchaseCost; 
+                
+                if (existingJoker) {
+                    existingJoker.level++;
+                    existingJoker.currentCost = purchaseCost; // Update current cost for selling
+                    setMessageBox(`Leveled up ${existingJoker.name} to Lvl ${existingJoker.level}!`);
+                } else {
+                    jokers.push({ ...jokerDef, level: 1, currentCost: purchaseCost }); // Add new joker with level 1 and its cost
+                    if (jokerDef.type === 'negative') {
+                        setMessageBox(`You took a ${jokerDef.name} for $${-purchaseCost} and gained its effect!`);
+                    } else {
+                        setMessageBox(`You bought ${jokerDef.name}!`);
+                    }
+                }
+                jokersBoughtThisShop++; // Increment count
+                shopBalanceSpan.textContent = playerBalance;
+                jokersBoughtThisShopCountSpan.textContent = jokersBoughtThisShop; // Update shop UI
+                populateShopItems(); // Re-render shop to update button states (disable bought item, check limits)
+                populateShopOwnedJokers(); // Refresh owned jokers list in shop
+                updateUI(); // Update main UI with new joker
+            } else {
+                setMessageBox('Not enough money to buy that!');
+            }
+        }
+
+        /**
+         * Closes the shop overlay and proceeds to the next ante.
+         */
+        function closeShop() {
+            shopOverlay.classList.remove('active');
+            startNewAnte();
+        }
+
+        // --- Joker Book Functions ---
+        /**
+         * Opens the Joker Book overlay and populates it.
+         */
+        function openJokerBook() {
+            jokerBookItemsDiv.innerHTML = ''; // Clear previous items
+
+            allJokers.forEach(jokerDef => {
+                const itemElement = document.createElement('div');
+                itemElement.classList.add('book-joker-item', jokerDef.rarity);
+                itemElement.style.backgroundColor = rarityDefs[jokerDef.rarity].color;
+                if (['affliction', 'super', 'advanced'].includes(jokerDef.rarity)) { // Ensure text color for these rarities is readable
+                    itemElement.style.color = '#f8fafc';
+                } else {
+                    itemElement.style.color = '#2d3748'; /* Default for other jokers */
+                }
+
+                const existingJoker = jokers.find(j => j.name === jokerDef.name);
+                const currentLevel = existingJoker ? existingJoker.level : 0; // 0 if not owned
+                const maxLevel = rarityDefs[jokerDef.rarity].maxLevel;
+                const slotsText = jokerDef.slots > 0 ? `Slots: ${jokerDef.slots}` : 'No Slot';
+
+                itemElement.innerHTML = `
+                    <h3>${jokerDef.name}</h3>
+                    <p>${jokerDef.getDesc(currentLevel > 0 ? currentLevel : 1)}</p>
+                    <div class="tooltip">${escapeHtml(jokerDef.getDesc(currentLevel > 0 ? currentLevel : 1))}</div>
+                    <p>Rarity: ${jokerDef.rarity.charAt(0).toUpperCase() + jokerDef.rarity.slice(1)}</p>
+                    <p>Level: ${currentLevel}/${maxLevel}</p>
+                    <p>Base Cost: $${jokerDef.baseCost}</p>
+                    <p>${slotsText}</p>
+                `;
+                jokerBookItemsDiv.appendChild(itemElement);
+            });
+
+            jokerBookOverlay.classList.add('active');
+        }
+
+        /**
+         * Closes the Joker Book overlay.
+         */
+        function closeJokerBook() {
+            jokerBookOverlay.classList.remove('active');
+        }
+
+        // --- Hand Book Functions ---
+        /**
+         * Opens the Hand Book overlay and populates it.
+         */
+        function openHandBook() {
+            handBookItemsDiv.innerHTML = ''; // Clear previous items
+
+            for (const handType in handScores) {
+                const handInfo = handScores[handType];
+                const itemElement = document.createElement('div');
+                itemElement.classList.add('hand-item');
+                itemElement.innerHTML = `
+                    <h3>${handType}</h3>
+                    <p>Base Chips: ${handInfo.chips}</p>
+                    <p>Base Mult: ${handInfo.mult}</p>
+                `;
+                handBookItemsDiv.appendChild(itemElement);
+            }
+            handBookOverlay.classList.add('active');
+        }
+
+        /**
+         * Closes the Hand Book overlay.
+         */
+        function closeHandBook() {
+            handBookOverlay.classList.remove('active');
+        }
+
+        // --- Cash Out Dialog Functions ---
+        /**
+         * Opens the cash out confirmation dialog.
+         */
+        function openCashOutDialog() {
+            const cashOutPercentage = Math.floor((currentAnte / MAX_ANTE) * 100);
+            const cashOutAmount = Math.floor(playerBalance * (cashOutPercentage / 100));
+            cashOutMessage.textContent = `Are you sure you want to cash out? You will receive ${cashOutPercentage}% of your current balance ($${playerBalance}), which is $${cashOutAmount}.`;
+            cashOutDialog.classList.add('active');
+        }
+
+        /**
+         * Confirms the cash out and ends the game.
+         */
+        function confirmCashOut() {
+            const cashOutPercentage = (currentAnte / MAX_ANTE);
+            const finalWinnings = Math.floor(playerBalance * cashOutPercentage);
+            gameOver(`You cashed out! Your final winnings are $${finalWinnings}.`);
+            closeCashOutDialog();
+        }
+
+        /**
+         * Closes the cash out confirmation dialog.
+         */
+        function closeCashOutDialog() {
+            cashOutDialog.classList.remove('active');
+        }
+
+        // --- Hand Toast Functions ---
+        /**
+         * Updates the hand toast with the current selected hand type.
+         */
+        function updateHandToast() {
+            clearTimeout(handToastTimeout); // Clear any existing timeout
+
+            if (selectedCards.length > 0) {
+                const evaluation = evaluatePokerHand(selectedCards);
+                handToast.textContent = evaluation.type;
+                handToast.classList.add('show');
+                // Hide after a delay if no new selection
+                handToastTimeout = setTimeout(() => {
+                    handToast.classList.remove('show');
+                }, 2000); // Hide after 2 seconds
+            } else {
+                hideHandToast();
+            }
+        }
+
+        /**
+         * Hides the hand toast.
+         */
+        function hideHandToast() {
+            clearTimeout(handToastTimeout);
+            handToast.classList.remove('show');
+        }
+
+        // --- Utility Function ---
+        /**
+         * Escapes HTML entities in a string to prevent XSS.
+         * @param {string} str The string to escape.
+         * @returns {string} The escaped string.
+         */
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+
+        // --- Poker Hand Evaluation Logic ---
+
+        /**
+         * Helper function to get numerical value of a card rank.
+         * @param {string} rank The card rank (e.g., 'A', 'K', '2').
+         * @returns {number} The numerical value.
+         */
+        function getRankValue(rank) {
+            return cardValues[rank];
+        }
+
+        /**
+         * Evaluates a poker hand based on standard poker rules, with flexibility for Balatro-like partial hands.
+         * @param {Array<Object>} hand The hand of cards to evaluate.
+         * @returns {Object} An object with hand type, base chips, and base multiplier.
+         */
+        function evaluatePokerHand(hand) {
+            // console.log("--- Evaluating Hand ---");
+            // console.log("Input hand:", hand);
+
+            let rankCounts = {};
+            let suitCounts = {};
+
+            if (!Array.isArray(hand) || hand.length === 0) {
+                // console.log("Result: No Hand Played (empty or not array)");
+                return { type: 'No Hand Selected', chips: 0, mult: 0 }; // Changed from 'No Hand Played' for toast
+            }
+
+            const validHand = hand.filter(card => card && typeof card.rank !== 'undefined' && typeof card.suit !== 'undefined');
+            if (validHand.length !== hand.length) {
+                console.error("Invalid card found in hand. Original:", hand, "Filtered:", validHand);
+                // console.log("Result: Invalid Hand (contains invalid cards)");
+                return { type: 'Invalid Hand (contains invalid cards)', chips: 0, mult: 0 };
+            }
+
+            // Sort hand by rank for easier evaluation
+            validHand.sort((a, b) => getRankValue(a.rank) - getRankValue(b.rank));
+
+            const ranksInHand = validHand.map(card => getRankValue(card.rank));
+            const suitsInHand = validHand.map(card => card.suit);
+
+            // Populate counts
+            ranksInHand.forEach(rank => {
+                rankCounts[rank] = (rankCounts[rank] || 0) + 1;
+            });
+
+            suitsInHand.forEach(suit => {
+                suitCounts[suit] = (suitCounts[suit] || 0) + 1;
+            });
+
+            const counts = Object.values(rankCounts).sort((a, b) => b - a); // Sort descending frequency of counts
+            const uniqueRanks = Object.keys(rankCounts).length;
+            const maxCount = counts[0]; // Highest frequency of a rank
+
+            let isFlush = false;
+            if (validHand.length >= 5) { // Flush requires at least 5 cards
+                isFlush = Object.values(suitCounts).some(count => count === 5);
+            }
+
+            let isStraight = false;
+            if (validHand.length >= 5) { // Straight requires at least 5 cards
+                // Check for regular straight (e.g., 2,3,4,5,6)
+                let regularStraight = true;
+                for (let i = 0; i < ranksInHand.length - 1; i++) {
+                    if (ranksInHand[i + 1] !== ranksInHand[i] + 1) {
+                        regularStraight = false;
+                        break;
+                    }
+                }
+                // Check for Ace-low straight (A, 2, 3, 4, 5) where Ace is 14
+                const ranksForAceLowCheck = ranksInHand.map(rank => rank === 14 ? 1 : rank).sort((a,b) => a - b);
+                let isAceLowStraight = true;
+                for (let i = 0; i < ranksForAceLowCheck.length - 1; i++) {
+                    if (ranksForAceLowCheck[i + 1] !== ranksForAceLowCheck[i] + 1) {
+                        isAceLowStraight = false;
+                        break;
+                    }
+                }
+                isStraight = regularStraight || (isAceLowStraight && ranksForAceLowCheck[4] === 5); // Ensure it's 2,3,4,5,A
+            }
+
+            let resultHandType = 'High Card'; // Default
+            let resultScore = handScores['High Card'];
+
+            // console.log("Rank Counts:", rankCounts);
+            // console.log("Counts (sorted frequencies):", counts);
+            // console.log("Unique Ranks:", uniqueRanks);
+            // console.log("Max Count:", maxCount);
+            // console.log("Is Flush:", isFlush);
+            // console.log("Is Straight:", isStraight);
+
+
+            // --- Determine Hand Type (from highest to lowest priority) ---
+            // 5-card hands first (if hand.length is 5)
+            if (validHand.length === 5) {
+                if (isStraight && isFlush) {
+                    const isRoyal = ranksInHand.includes(10) && ranksInHand.includes(11) &&
+                                    ranksInHand.includes(12) && ranksInHand.includes(13) &&
+                                    ranksInHand.includes(14);
+                    if (isRoyal) {
+                        resultHandType = 'Royal Flush';
+                        resultScore = handScores['Royal Flush'];
+                    } else {
+                        resultHandType = 'Straight Flush';
+                        resultScore = handScores['Straight Flush'];
+                    }
+                } else if (maxCount === 4) {
+                    resultHandType = 'Four of a Kind';
+                    resultScore = handScores['Four of a Kind'];
+                } else if (maxCount === 3 && counts[1] === 2) { // Three of a kind and a pair
+                    resultHandType = 'Full House';
+                    resultScore = handScores['Full House'];
+                } else if (isFlush) {
+                    resultHandType = 'Flush';
+                    resultScore = handScores['Flush'];
+                } else if (isStraight) {
+                    resultHandType = 'Straight';
+                    resultScore = handScores['Straight'];
+                } else if (maxCount === 3) { // Three of a Kind (not part of Full House)
+                    resultHandType = 'Three of a Kind';
+                    resultScore = handScores['Three of a Kind'];
+                } else if (counts[0] === 2 && counts[1] === 2) { // Two Pair
+                    resultHandType = 'Two Pair';
+                    resultScore = handScores['Two Pair'];
+                } else if (maxCount === 2) { // One Pair
+                    resultHandType = 'Pair';
+                    resultScore = handScores['Pair'];
+                } else {
+                    resultHandType = 'High Card';
+                    resultScore = handScores['High Card'];
+                }
+            }
+            // Hands that can be less than 5 cards (or if 5 cards, but no higher hand found)
+            else {
+                if (maxCount === 4) {
+                    resultHandType = 'Four of a Kind';
+                    resultScore = handScores['Four of a Kind'];
+                } else if (maxCount === 3) {
+                    resultHandType = 'Three of a Kind';
+                    resultScore = handScores['Three of a Kind'];
+                } else if (maxCount === 2) {
+                    resultHandType = 'Pair';
+                    resultScore = handScores['Pair'];
+                } else {
+                    resultHandType = 'High Card';
+                    resultScore = handScores['High Card'];
+                }
+            }
+            
+            // console.log("Final Hand Type:", resultHandType);
+            // console.log("Final Score (chips/mult):", resultScore);
+            return { type: resultHandType, chips: resultScore.chips, mult: resultScore.mult };
+        }
+
+        // --- Initial Setup Call ---
+        startNewAnte(); // Start the first ante when the page loads
+    </script>
+</body>
+</html>
